@@ -23,9 +23,9 @@ const decodeToken = (token) => {
  * @param {number} id
  * @returns
  */
-const generateToken = (id) => {
+const generateToken = (emp_id) => {
 	try {
-		const token = jwt.sign({ id }, jwtConfig.jwtSecret, {
+		const token = jwt.sign({ emp_id }, jwtConfig.jwtSecret, {
 			expiresIn: jwtConfig.expiresIn,
 		});
 		return token;

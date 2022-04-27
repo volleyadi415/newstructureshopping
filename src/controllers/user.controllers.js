@@ -81,11 +81,38 @@ const userLogin = async (req, res, next) => {
  * @param {object} res
  * @param {object} next
  */
+ const userLogout = async (req, res, next) => {
+    const con = req._con;
+    await con.begin();
+
+    try {
+        const response = await userService.userLogout(con, req._emp_id);
+
+        await con.commit();
+        con.release();
+
+        res.send(response);
+    } catch (error) {
+        await con.rollback();
+        con.release();
+
+        next(error);
+    }
+};
+
+/**
+ * Delete user - controller
+ * @param {object} req
+ * @param {object} res
+ * @param {object} next
+ */
+
 
 // EXPORTS ==================================================================================================
 module.exports = {
     
     addUser,
     userLogin,
+    userLogout,
     
 };

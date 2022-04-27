@@ -48,37 +48,43 @@ const addUser = async (con, body) => {
  * @returns
  */
 const userLogin = async (con, body) => {
+    // console.log("entered into function");
     const response = {
         message: " logged in successfully",    
     };
     const { email_id, password } = body;
 
     // Check user if exists.
-    let records = await con.execute(`SELECT * FROM ${employee} WHERE email_id = "${email_id}"`);
+    // let query =`SELECT * FROM ${employee} WHERE email_id = "${email_id}"`;
+    // console.log(query);
+    let records = await con.execute(`SELECT * FROM ${employee} WHERE email_id = '${email_id}'`);
+    
 
     // if records are found then proceed
     if (records.rowCount > 0) {
-        const records = records.rows[0];
+        const record = records.rows[0];
+        //console.log(record);
 
         // Check if user is blocked
-        //if (record.blocked) throw ER_USER_BLOCKED;
+        if (record.blocked) throw ER_USER_BLOCKED;
 
         // Check password
-        if (records.password !== password) {
+        if (record.password !== password) {
             //**** ADD ENCRYPTION HERE LATER ON ****
             throw ER_DATA_NOT_FOUND("employee");
         }
 
         // Generate and update token.
         
-                const token = generateToken(record.id);
+                const token = generateToken(record.emp_id);
+               
                 response.data = (
                     await con.execute(
                         `UPDATE ${employee} 
                         SET token='${token}' 
-                        WHERE id=${record.id} 
+                        WHERE emp_id='${record.emp_id}' 
         
-				RETURNING    name, email_id, mobile_number, national_id`
+				RETURNING    name, email_id, mobile_number, national_id,token`
             )
         ).rows[0];
 
@@ -95,6 +101,15 @@ const userLogin = async (con, body) => {
 //  * @param {string} id
 //  * @returns
 //  */
+const userLogout = async (con, emp_id) => {
+    const response = {
+        message: "User successfully logged out.",
+        data: {},
+    };
+
+    await con.execute(`UPDATE ${employee} SET token='' WHERE emp_id= '${emp_id}'`);
+    return response;
+};
     
 // EXPORTS ==================================================================================================
-module.exports = {  addUser, userLogin };
+module.exports = {  addUser, userLogin,userLogout };

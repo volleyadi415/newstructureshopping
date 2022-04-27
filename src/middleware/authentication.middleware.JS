@@ -4,7 +4,7 @@
 const { ER_UNAUTHENTICATED_USER } = require("../constants/errors.constants");
 const Connection = require("../includes/database_connection");
 const { decodeToken } = require("../helpers/jwt");
-const { USERS } = require("../constants/tables.constants");
+const {  employee } = require("../constants/tables.constants");
 const logger = require("../helpers/logger");
 
 // METHODS ==================================================================================================
@@ -21,18 +21,18 @@ const authentication = async (req, res, next) => {
 		const dToken = decodeToken(token);
 
 		// If token is decoded then it will have id. Else it will throw error
-		if (dToken.id) {
+		if (dToken.emp_id) {
 			// Creating connection
 			const con = new Connection();
 			await con.connect();
 			// Fetching user data
 			const records = await con.execute(
-				`SELECT id FROM ${USERS} WHERE token='${token}'`,
+				`SELECT emp_id FROM ${employee} WHERE token='${token}'`,
 			);
 			
 			// Checking if user exists
 			if (records.rowCount === 1) {
-				req._id = records.rows[0].id;
+				req._emp_id = records.rows[0].emp_id;
 				req._con = con;
 				return next();
 			}
